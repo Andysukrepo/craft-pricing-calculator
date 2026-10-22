@@ -33,6 +33,7 @@ import {
   savePayhipUrl,
   checkUrlForLicense,
   DEFAULT_PAYHIP_URL,
+  isTrialKey,
 } from './utils/license';
 import {
   CheckCircle2,
@@ -77,7 +78,11 @@ export default function App() {
     if (urlCheck.activated) {
       setIsPro(true);
       if (urlCheck.key) setLicenseKey(urlCheck.key);
-      notify('🎉 Welcome to PRO! Your Payhip license key has been verified and activated.', 'success');
+      if (urlCheck.isTrial) {
+        notify('⏳ 3-Day Tester Trial activated! All PRO features are unlocked for 72 hours.', 'success');
+      } else {
+        notify('🎉 Welcome to PRO! Your Payhip license key has been verified and activated.', 'success');
+      }
     }
   }, []);
 
@@ -309,7 +314,12 @@ export default function App() {
     if (success) {
       setIsPro(true);
       setLicenseKey(key.trim().toUpperCase());
-      notify('Payhip PRO license activated! All features unlocked.', 'success');
+      const isTrial = isTrialKey(key);
+      if (isTrial) {
+        notify('⏳ 3-Day Tester Trial activated! All PRO features unlocked for 72 hours.', 'success');
+      } else {
+        notify('Payhip PRO license activated! All features unlocked.', 'success');
+      }
       return true;
     }
     return false;

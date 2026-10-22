@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { AppSettings, PlatformPreset } from '../types/calculator';
 import { PLATFORM_LABELS, DEFAULT_SETTINGS } from '../utils/calculator';
-import { maskLicenseKey, DEFAULT_PAYHIP_URL } from '../utils/license';
+import { maskLicenseKey, DEFAULT_PAYHIP_URL, getStoredLicense } from '../utils/license';
 
 interface SettingsViewProps {
   settings: AppSettings;
@@ -149,9 +149,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   Payhip PRO Membership
                 </h3>
                 {isPro ? (
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200">
-                    Active
-                  </span>
+                  getStoredLicense().isTrial ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold border border-blue-200">
+                      3-Day Tester Trial ({getStoredLicense().trialRemainingText || 'Active'})
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200">
+                      Active
+                    </span>
+                  )
                 ) : (
                   <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-200">
                     Free Plan
@@ -160,7 +166,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
               <p className="text-xs text-[#5d6d7d] mt-0.5">
                 {isPro
-                  ? 'Your workspace has full, unrestricted access to unlimited products, library items, CSV exports, and simulator.'
+                  ? getStoredLicense().isTrial
+                    ? `Tester pass is active with full PRO capabilities (${getStoredLicense().trialRemainingText || '72h remaining'}).`
+                    : 'Your workspace has full, unrestricted access to unlimited products, library items, CSV exports, and simulator.'
                   : 'Free tier is limited to 2 saved products and 5 materials. Upgrade to PRO for unlimited access.'}
               </p>
             </div>
@@ -196,13 +204,23 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           {isPro ? (
             <div className="bg-[#f8fafc] border border-[#dbe1e6] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
-                <div className="text-xs text-[#5d6d7d] font-medium">Active License Key</div>
+                <div className="text-xs text-[#5d6d7d] font-medium">
+                  {getStoredLicense().isTrial ? 'Tester Trial Key' : 'Active License Key'}
+                </div>
                 <div className="font-mono text-sm font-bold text-[#2d3e51]">
-                  {maskLicenseKey(licenseKey) || 'PRO-ACTIVATED'}
+                  {maskLicenseKey(
+                    licenseKey,
+                    getStoredLicense().isTrial,
+                    getStoredLicense().trialRemainingText
+                  ) || 'PRO-ACTIVATED'}
                 </div>
                 <div className="text-[11px] text-emerald-700 flex items-center gap-1 font-medium">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Verified for This Man Makes craft ecosystem</span>
+                  <span>
+                    {getStoredLicense().isTrial
+                      ? `Full PRO unlocked for testing • Expires in ${getStoredLicense().trialRemainingText || '3 days'}`
+                      : 'Verified for This Man Makes craft ecosystem'}
+                  </span>
                 </div>
               </div>
 
@@ -216,18 +234,28 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
           ) : (
             <form onSubmit={handleKeySubmit} className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-1">
                 <label className="block text-xs font-bold text-[#2d3e51] flex items-center gap-1.5">
                   <KeyRound className="w-3.5 h-3.5 text-[#2d3e51]" />
                   <span>Activate PRO License Key</span>
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setKeyInput('PRO')}
-                  className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 underline"
-                >
-                  Fill test key (PRO)
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setKeyInput('TESTER')}
+                    className="text-[11px] font-semibold text-blue-700 hover:text-blue-800 underline"
+                  >
+                    Fill 3-day tester key (TESTER)
+                  </button>
+                  <span className="text-zinc-300">•</span>
+                  <button
+                    type="button"
+                    onClick={() => setKeyInput('PRO')}
+                    className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 underline"
+                  >
+                    Fill test key (PRO)
+                  </button>
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2">

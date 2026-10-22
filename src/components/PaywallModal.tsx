@@ -181,13 +181,23 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
                   <KeyRound className="w-3.5 h-3.5 text-[#2d3e51]" />
                   <span>Already bought? Activate your key</span>
                 </label>
-                <button
-                  type="button"
-                  onClick={handleQuickTest}
-                  className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 underline"
-                >
-                  Fill test key (PRO)
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setInputKey('TESTER')}
+                    className="text-[11px] font-semibold text-blue-700 hover:text-blue-800 underline"
+                  >
+                    Tester key (TESTER)
+                  </button>
+                  <span className="text-zinc-300">•</span>
+                  <button
+                    type="button"
+                    onClick={handleQuickTest}
+                    className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 underline"
+                  >
+                    Test key (PRO)
+                  </button>
+                </div>
               </div>
 
               <div className="flex gap-2">
